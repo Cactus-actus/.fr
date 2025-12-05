@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cactus - Actualités</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Montserrat:wght@300;400;600&display=swap');
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0a2f1f, #113a27, #0d2a1a);
+      background-size: 400% 400%;
+      animation: gradientFlow 12s ease infinite;
+      position: relative;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      justify-content: center;
+      padding: 25px 0;
+      color: white;
+    }
+
+    header img {
+      width: 40px;
+      height: 40px;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      margin: 0;
+      letter-spacing: 2px;
+    }
+
+    nav {
+      background: #082014;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      color: black;
+    }
+
+    .article-card {
+      background: white;
+      color: black;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .article-text {
+      flex: 1;
+    }
+
+    .article-image-container {
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .article-card img {
+      max-width: 120px;
+      border-radius: 6px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .article-card h2 {
+      margin-top: 0;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .delete-btn:hover {
+      background: #ff7875;
+    }
+
+    #adminBtn, #publicViewBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      color: black;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #adminBtn:hover, #publicViewBtn:hover {
+      background: #f0f0f0;
+    }
+    #publicViewBtn {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.8rem;
+      color: white;
+      background: #082014;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path fill='%23ffffff' d='M32 2c-4 8-12 14-12 26 0 12 8 22 12 34 4-12 12-22 12-34 0-12-8-18-12-26z'/></svg>" alt="Logo Cactus" />
+    <h1>Cactus</h1>
+  </header>
+
+  <nav>
+    <a href="#" data-section="Tous">Tous</a>
+    <a href="#" data-section="Politique">Politique</a>
+    <a href="#" data-section="Société">Société</a>
+    <a href="#" data-section="Conflits">Conflits</a>
+    <a href="#" data-section="Environnement">Environnement</a>
+    <a href="#" data-section="Sport">Sport</a>
+  </nav>
+
+  <div id="adminOptions" style="display:none; text-align:center; margin:20px;">
+    <button id="openAddForm" style="padding:12px 25px; border-radius:8px; font-weight:bold; cursor:pointer;">Ajouter un article</button>
+  </div>
+
+  <div id="addForm" style="display:none; max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:12px; color:black;">
+    <h2>Ajouter un article</h2>
+    <label>Rubrique :</label>
+    <select id="rubriqueSelect" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px;">
+      <option value="Tous">Tous</option>
+      <option value="Politique">Politique</option>
+      <option value="Société">Société</option>
+      <option value="Conflits">Conflits</option>
+      <option value="Environnement">Environnement</option>
+      <option value="Sport">Sport</option>
+    </select>
+
+    <label>Titre :</label>
+    <input id="artTitle" type="text" style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px;" />
+
+    <label>Contenu :</label>
+    <textarea id="artContent" style="width:100%; height:140px; padding:8px; border-radius:6px;"></textarea>
+
+    <label>Image :</label>
+    <input type="file" id="artImage" accept="image/*" style="margin-bottom:10px;" />
+
+    <button id="submitArticle" style="margin-top:15px; padding:10px 20px; font-weight:bold; cursor:pointer;">Publier</button>
+  </div>
+
+  <div class="container"></div>
+
+  <a href="#" id="adminBtn">Administrateur</a>
+  <a href="#" id="publicViewBtn">Vue publique</a>
+
+  <div id="toast" class="toast"></div>
+
+  <footer>Cactus actualités - Tous Droits réservés</footer>
+
+  <script>
+    const adminBtn = document.getElementById('adminBtn');
+    const publicBtn = document.getElementById('publicViewBtn');
+    const adminOptions = document.getElementById('adminOptions');
+    const addForm = document.getElementById('addForm');
+    const openAddForm = document.getElementById('openAddForm');
+    const submitArticle = document.getElementById('submitArticle');
+    const publicContainer = document.querySelector('.container');
+    const toast = document.getElementById('toast');
+
+    let adminMode = false;
+    let articles = JSON.parse(localStorage.getItem('articles')) || [];
+    let currentSection = 'Tous';
+
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentSection = link.getAttribute('data-section');
+        renderArticles();
+      });
+    });
+
+    function saveArticles() {
+      localStorage.setItem('articles', JSON.stringify(articles));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2500);
+    }
+
+    function renderArticles() {
+      publicContainer.innerHTML = '';
+      let displayedArticles = currentSection === 'Tous' ? articles : articles.filter(a => a.category === currentSection);
+      displayedArticles.forEach((article, index) => {
+        const card = document.createElement('div');
+        card.className = 'article-card';
+
+        let textHTML = `<div class='article-text'><h2>${article.title}</h2><p>${article.content}</p></div>`;
+        let imageHTML = article.image ? `<div class='article-image-container'><img src='${article.image}' alt='Image article' /></div>` : '';
+        let deleteBtnHTML = '';
+        if(adminMode){
+          deleteBtnHTML = `<button class='delete-btn' data-index='${index}'>Poubelle</button>`;
+        }
+        card.innerHTML = textHTML + imageHTML + deleteBtnHTML;
+        publicContainer.appendChild(card);
+      });
+      if(adminMode){
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = btn.getAttribute('data-index');
+            if(confirm('Voulez-vous vraiment supprimer cet article ?')){
+              articles.splice(index,1);
+              saveArticles();
+              renderArticles();
+              showToast('Article supprimé avec succès !');
+            }
+          });
+        });
+      }
+    }
+
+    adminBtn.addEventListener('click', () => {
+      const mdp = prompt('Entrez le mot de passe administrateur :');
+      if (mdp === 'pique2026') {
+        adminMode = true;
+        adminOptions.style.display = 'block';
+        publicBtn.style.display = 'block';
+        renderArticles();
+      } else {
+        alert('Mot de passe incorrect.');
+      }
+    });
+
+    publicBtn.addEventListener('click', () => {
+      adminMode = false;
+      adminOptions.style.display = 'none';
+      addForm.style.display = 'none';
+      publicBtn.style.display = 'none';
+      renderArticles();
+      window.scrollTo(0, 0);
+    });
+
+    openAddForm.addEventListener('click', () => {
+      addForm.style.display = 'block';
+      window.scrollTo(0, addForm.offsetTop);
+    });
+
+    submitArticle.addEventListener('click', () => {
+      const rubrique = document.getElementById('rubriqueSelect').value;
+      const titre = document.getElementById('artTitle').value;
+      const contenu = document.getElementById('artContent').value;
+      const imageFile = document.getElementById('artImage').files[0];
+
+      if (!titre || !contenu) {
+        alert('Veuillez remplir tous les champs.');
+        return;
+      }
+
+      if(imageFile){
+        const reader = new FileReader();
+        reader.onload = function(e){
+          articles.unshift({ title: titre, content: contenu, category: rubrique, image: e.target.result });
+          saveArticles();
+          renderArticles();
+          addForm.style.display = 'none';
+          document.getElementById('artTitle').value = '';
+          document.getElementById('artContent').value = '';
+          document.getElementById('artImage').value = '';
+          showToast('Article publié avec succès dans ' + rubrique + '!');
+        };
+        reader.readAsDataURL(imageFile);
+      } else {
+        articles.unshift({ title: titre, content: contenu, category: rubrique, image: null });
+        saveArticles();
+        renderArticles();
+        addForm.style.display = 'none';
+        document.getElementById('artTitle').value = '';
+        document.getElementById('artContent').value = '';
+        showToast('Article publié avec succès dans ' + rubrique + '!');
+      }
+    });
+
+    renderArticles();
+  </script>
+</body>
+</html>
